@@ -26,7 +26,7 @@ class AppSecurityConfig {
     }
 
     @Bean
-    fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain? {
+    fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         http
             .authorizeExchange { exchanges: AuthorizeExchangeSpec ->
                 exchanges
