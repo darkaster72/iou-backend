@@ -28,6 +28,7 @@ class AppSecurityConfig {
     @Bean
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         http
+            .csrf().disable()
             .authorizeExchange { exchanges: AuthorizeExchangeSpec ->
                 exchanges
                     .anyExchange().authenticated()
