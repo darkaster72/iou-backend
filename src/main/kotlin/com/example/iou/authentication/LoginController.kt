@@ -21,11 +21,8 @@ class LoginController(
 
     @PostMapping
     fun login(@RequestBody request: AuthenticationRequest): Mono<ResponseEntity<AuthenticationResponse>> {
-        val password = request.password
         return appUserService.findByUsername(request.username)
-            .checkpoint()
-            .filter { passwordEncoder.encode(password).equals(it.password) }
-            .checkpoint()
+            .filter { passwordEncoder.matches(request.password, it.password) }
             .map { ResponseEntity.ok(AuthenticationResponse(generateToken(it))) }
             .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
     }
