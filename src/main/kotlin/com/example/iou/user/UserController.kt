@@ -7,15 +7,15 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("api/v1/users")
-class UserController(private val appService: AppService) {
+class UserController(private val appUserService: AppUserService) {
 
     @GetMapping
     fun getUsers(): Flux<UserDto> {
-        return appService.getUsers()
+        return appUserService.getUsers()
     }
 
     @PostMapping
     fun addUser(@RequestBody userDto: Mono<UserDto>): Mono<UserDto> {
-        return appService.addUser(userDto)
+        return appUserService.addUser(userDto)
     }
 }

@@ -1,7 +1,19 @@
-
 spring:
+  jpa:
+#    ddl-auto: create-drop
   data:
     mongodb:
-      databse: test
+      database: test
       host: localhost
       port: 27017
+
+application:
+  jwt:
+    secret: somerandomshi*tthatchangesandsomeshitdontwork
+    tokenPrefix: "Bearer "
+    tokenExpirationAfterHours: 4
+
+
+logging:
+  level:
+    web: debug

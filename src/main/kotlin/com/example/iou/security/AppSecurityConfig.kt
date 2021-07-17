@@ -1,40 +1,29 @@
 package com.example.iou.security
 
 import org.springframework.context.annotation.Bean
-import org.springframework.security.config.Customizer
+import org.springframework.http.HttpMethod
+import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.config.web.server.ServerHttpSecurity.AuthorizeExchangeSpec
-import org.springframework.security.core.userdetails.MapReactiveUserDetailsService
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.server.SecurityWebFilterChain
 
 
 @EnableWebFluxSecurity
-class AppSecurityConfig {
-
-    @Bean
-    fun userDetailsService(): MapReactiveUserDetailsService? {
-        val user: UserDetails = User
-            .withDefaultPasswordEncoder()
-            .username("user")
-            .password("user")
-            .roles("USER")
-            .build()
-        return MapReactiveUserDetailsService(user)
-    }
+class AppSecurityConfig(
+    private val authenticationManager: ReactiveAuthenticationManager,
+) {
 
     @Bean
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-        http
+        return http
             .csrf().disable()
-            .authorizeExchange { exchanges: AuthorizeExchangeSpec ->
-                exchanges
-                    .anyExchange().authenticated()
-            }
-            .httpBasic(Customizer.withDefaults())
-            .formLogin(Customizer.withDefaults())
-        return http.build()
+            .formLogin().disable()
+            .httpBasic().disable()
+            .authenticationManager(authenticationManager)
+            .authorizeExchange()
+            .pathMatchers(HttpMethod.OPTIONS).permitAll()
+            .pathMatchers("/login", "/api/v*/register").permitAll()
+            .anyExchange().authenticated()
+            .and().build();
     }
 }

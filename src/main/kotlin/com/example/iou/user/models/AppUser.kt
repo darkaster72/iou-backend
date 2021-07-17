@@ -11,6 +11,7 @@ class AppUser(
     var lastName: String,
     var email: String,
     var phone: String,
+    username: String,
     password: String,
 ) :
     UserDetails {
@@ -18,6 +19,9 @@ class AppUser(
     lateinit var id: String
     var password: String = password
         @JvmName("password") get;
+
+    var username: String = username
+        @JvmName("username") get;
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         return mutableListOf();
