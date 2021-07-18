@@ -9,4 +9,7 @@ import reactor.core.publisher.Mono
 @Repository
 interface UserRepository : ReactiveMongoRepository<AppUser, String> {
     fun findByUsername(username: String?): Mono<UserDetails>
+
+    fun existsByUsername(username: String?): Mono<Boolean>
+
 }

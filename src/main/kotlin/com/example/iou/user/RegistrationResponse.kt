@@ -1,5 +1,3 @@
 package com.example.iou.user
 
-class RegistrationResponse {
-
-}
+data class RegistrationResponse(val error: String = "", val success: Boolean = true)

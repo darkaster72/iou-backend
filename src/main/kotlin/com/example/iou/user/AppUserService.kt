@@ -5,7 +5,6 @@ import com.example.iou.user.models.AppUser
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -19,14 +18,17 @@ class AppUserService(
         return userRepository.findByUsername(username);
     }
 
+    fun userExists(user: UserDto): Mono<Boolean> {
+        return userRepository.existsByUsername(user.email)
+    }
+
     fun getUsers(): Flux<UserDto> {
         return userRepository.findAll().map { it.toDto() }
     }
 
-    fun addUser(user: Mono<UserDto>): Mono<UserDto> {
-        return user.map { it.toAppUser() }
-            .map { it.copyWith(password = passwordEncoder.encode(it.password)) }
-            .flatMap { userRepository.insert(it) }
+    fun addUser(user: UserDto): Mono<UserDto> {
+        val appUser = user.toAppUser().copyWith(password = passwordEncoder.encode(user.password))
+        return userRepository.insert(appUser)
             .map { it.toDto() }
     }
 

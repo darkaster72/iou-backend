@@ -2,14 +2,20 @@ package com.example.iou.user
 
 import com.example.iou.models.UserDto
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.RequestBody
 import reactor.core.publisher.Mono
 
 @Service
 class RegistrationService(
     private val userService: AppUserService,
 ) {
-    fun register(@RequestBody userDto: Mono<UserDto>): Mono<RegistrationResponse> {
-        return userService.addUser(userDto).map { RegistrationResponse() }
+    fun register(userDto: UserDto): Mono<RegistrationResponse> {
+        return userService
+            .userExists(userDto)
+            .flatMap { userExists ->
+                if (userExists)
+                    Mono.just(RegistrationResponse(error = "User already exists", success = false))
+                else
+                    this.userService.addUser(userDto).map { RegistrationResponse() }
+            }
     }
 }

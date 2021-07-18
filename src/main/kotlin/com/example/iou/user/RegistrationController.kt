@@ -14,7 +14,9 @@ import java.util.*
 class RegistrationController(private val registrationService: RegistrationService) {
 
     @PostMapping
-    fun register(@RequestBody request: Mono<UserDto>): ResponseEntity<Any> {
-        return ResponseEntity.of(Optional.of(registrationService.register(request)))
+    fun register(@RequestBody request: Mono<UserDto>): Mono<ResponseEntity<Any>> {
+        return request
+            .flatMap { registrationService.register(it) }
+            .map { ResponseEntity.of(Optional.of(it)) }
     }
 }

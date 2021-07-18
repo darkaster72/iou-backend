@@ -16,6 +16,6 @@ class UserController(private val appUserService: AppUserService) {
 
     @PostMapping
     fun addUser(@RequestBody userDto: Mono<UserDto>): Mono<UserDto> {
-        return appUserService.addUser(userDto)
+        return userDto.flatMap { appUserService.addUser(it) }
     }
 }
