@@ -7,7 +7,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
-import java.util.stream.Collectors
 
 @Component
 class AppAuthenticationManager(
@@ -22,13 +21,13 @@ class AppAuthenticationManager(
             .switchIfEmpty(Mono.empty())
             .map {
                 val claims: Claims = jwtUtil.getAllClaimsFromToken(authToken)
-                val rolesMap: List<String> = claims.get("role", List::class.java) as List<String>
+                val roleList: List<Map<String, String>> =
+                    claims.get("role", List::class.java) as List<Map<String, String>>
+                val roles = roleList.map { it["authority"] }.map(::SimpleGrantedAuthority)
                 UsernamePasswordAuthenticationToken(
                     username,
-                    null,
-                    rolesMap.stream()
-                        .map(::SimpleGrantedAuthority)
-                        .collect(Collectors.toList())
+                    authentication.credentials,
+                    roles
                 )
             };
     }

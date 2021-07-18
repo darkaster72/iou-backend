@@ -3,6 +3,7 @@ package com.example.iou.user.models
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
 @Document(collection = "users")
@@ -13,6 +14,7 @@ class AppUser(
     var phone: String,
     username: String,
     password: String,
+    val userRoles: List<AppUserRole>,
 ) :
     UserDetails {
     @Id
@@ -23,8 +25,8 @@ class AppUser(
     var username: String = username
         @JvmName("username") get;
 
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        return mutableListOf();
+    override fun getAuthorities(): Collection<GrantedAuthority> {
+        return userRoles.map { SimpleGrantedAuthority(it.value) }
     }
 
     override fun getUsername(): String = this.email
@@ -38,4 +40,9 @@ class AppUser(
     override fun isCredentialsNonExpired(): Boolean = false
 
     override fun isEnabled(): Boolean = false
+}
+
+enum class AppUserRole(val value: String) {
+    USER("USER"),
+    ADMIN("ADMIN")
 }

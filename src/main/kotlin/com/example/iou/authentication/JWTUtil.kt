@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.context.annotation.Bean
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -41,7 +42,7 @@ class JWTUtil(private val jwtConfig: JwtConfig) {
 
     fun generateToken(user: UserDetails): String {
         val claims: MutableMap<String, Any?> = HashMap()
-        claims["role"] = user.authorities
+        claims["role"] = user.authorities.map { SimpleGrantedAuthority("ROLE_${it}") }
         return doGenerateToken(claims, user.username)
     }
 

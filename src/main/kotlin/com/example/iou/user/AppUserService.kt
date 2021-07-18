@@ -38,7 +38,8 @@ class AppUserService(
         email = email,
         username = email,
         password = password,
-        phone = phone
+        phone = phone,
+        userRoles = roles
     )
 
     fun AppUser.toDto(): UserDto = UserDto(
@@ -55,6 +56,7 @@ class AppUserService(
         email = email,
         username = username,
         password = password,
-        phone = phone
+        phone = phone,
+        userRoles = userRoles
     )
 }
