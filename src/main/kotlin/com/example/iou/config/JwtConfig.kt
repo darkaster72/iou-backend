@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders
 @ConfigurationProperties(prefix = "application.jwt")
 class JwtConfig() {
     lateinit var secret: String
-    lateinit var tokenPrefix: String
     lateinit var tokenExpirationAfterHours: Integer
 
     val authorizationHeader: String
