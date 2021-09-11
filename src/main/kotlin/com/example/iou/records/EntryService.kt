@@ -3,6 +3,7 @@ package com.example.iou.records
 import org.javamoney.moneta.Money
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import javax.money.Monetary
 
@@ -22,8 +23,7 @@ class EntryService(val entryRepository: EntryRepository) {
             source = userId,
             destination = entryRequest.destination,
             dateTime = entryRequest.dateTime,
-            amount = money.numberStripped,
-            currency = money.currency.currencyCode,
+            amount = money,
             description = entryRequest.description,
             transactionType = entryRequest.transactionType
         )
@@ -31,13 +31,28 @@ class EntryService(val entryRepository: EntryRepository) {
             source = entryRequest.destination,
             destination = userId,
             dateTime = entryRequest.dateTime,
-            amount = money.numberStripped,
-            currency = money.currency.currencyCode,
+            amount = money,
             description = entryRequest.description,
             transactionType = entryRequest.transactionType.opposite()
         )
         return listOf(firstEntry, secondEntry);
     }
 
+    fun getEntries(): Flux<EntryResponse> {
+        return ReactiveSecurityContextHolder.getContext()
+            .map { it.authentication.details as String }
+            .flatMapMany { entryRepository.findAllBySource(it) }
+            .map { (it as Entry).toEntryResponse() }
+    }
 }
 
+fun Entry.toEntryResponse(): EntryResponse = EntryResponse(
+    source = source,
+    destination = destination,
+    amount = amount.number.doubleValueExact(),
+    currency = amount.currency.currencyCode,
+    transactionType = transactionType,
+    dateTime = dateTime,
+    description = description,
+    verified = verified,
+)
