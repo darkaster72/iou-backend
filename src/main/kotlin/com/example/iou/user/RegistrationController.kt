@@ -1,6 +1,6 @@
 package com.example.iou.user
 
-import com.example.iou.models.UserDto
+import com.example.iou.models.UserRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,7 +14,7 @@ import java.util.*
 class RegistrationController(private val registrationService: RegistrationService) {
 
     @PostMapping
-    fun register(@RequestBody request: Mono<UserDto>): Mono<ResponseEntity<Any>> {
+    fun register(@RequestBody request: Mono<UserRequest>): Mono<ResponseEntity<Any>> {
         return request
             .flatMap { registrationService.register(it) }
             .map { ResponseEntity.of(Optional.of(it)) }

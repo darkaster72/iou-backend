@@ -1,6 +1,6 @@
 package com.example.iou.user
 
-import com.example.iou.models.UserDto
+import com.example.iou.models.UserRequest
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
@@ -8,14 +8,14 @@ import reactor.core.publisher.Mono
 class RegistrationService(
     private val userService: AppUserService,
 ) {
-    fun register(userDto: UserDto): Mono<RegistrationResponse> {
+    fun register(userRequest: UserRequest): Mono<RegistrationResponse> {
         return userService
-            .userExists(userDto)
+            .userExists(userRequest)
             .flatMap { userExists ->
                 if (userExists)
                     Mono.just(RegistrationResponse(error = "User already exists", success = false))
                 else
-                    this.userService.addUser(userDto).map { RegistrationResponse() }
+                    this.userService.addUser(userRequest).map { RegistrationResponse() }
             }
     }
 }

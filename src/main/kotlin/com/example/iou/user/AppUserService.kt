@@ -1,6 +1,7 @@
 package com.example.iou.user
 
-import com.example.iou.models.UserDto
+import com.example.iou.models.UserRequest
+import com.example.iou.models.UserResponse
 import com.example.iou.user.models.AppUser
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.UserDetails
@@ -18,21 +19,21 @@ class AppUserService(
         return userRepository.findByUsername(username);
     }
 
-    fun userExists(user: UserDto): Mono<Boolean> {
+    fun userExists(user: UserRequest): Mono<Boolean> {
         return userRepository.existsByUsername(user.email)
     }
 
-    fun getUsers(): Flux<UserDto> {
-        return userRepository.findAll().map { it.toDto() }
+    fun getUsers(): Flux<UserResponse> {
+        return userRepository.findAll().map { it.toResponse() }
     }
 
-    fun addUser(user: UserDto): Mono<UserDto> {
+    fun addUser(user: UserRequest): Mono<UserResponse> {
         val appUser = user.toAppUser().copyWith(password = passwordEncoder.encode(user.password))
         return userRepository.insert(appUser)
-            .map { it.toDto() }
+            .map { it.toResponse() }
     }
 
-    fun UserDto.toAppUser(): AppUser = AppUser(
+    fun UserRequest.toAppUser(): AppUser = AppUser(
         firstName = firstName,
         lastName = lastName,
         email = email,
@@ -42,11 +43,11 @@ class AppUserService(
         userRoles = roles
     )
 
-    fun AppUser.toDto(): UserDto = UserDto(
+    fun AppUser.toResponse(): UserResponse = UserResponse(
+        id = id,
         firstName = firstName,
         lastName = lastName,
         email = email,
-        password = password,
         phone = phone
     )
 
