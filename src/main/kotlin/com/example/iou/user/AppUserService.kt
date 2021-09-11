@@ -3,6 +3,7 @@ package com.example.iou.user
 import com.example.iou.models.UserRequest
 import com.example.iou.models.UserResponse
 import com.example.iou.user.models.AppUser
+import com.example.iou.user.models.AppUserView
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -17,6 +18,14 @@ class AppUserService(
 ) : ReactiveUserDetailsService {
     override fun findByUsername(username: String?): Mono<UserDetails> {
         return userRepository.findByUsername(username);
+    }
+
+    fun findByUsernameViewOnly(username: String?): Mono<AppUserView> {
+        return userRepository.findViewByUsername(username);
+    }
+
+    fun getIdByUsername(username: String?): Mono<String> {
+        return userRepository.findViewByUsername(username).map { it.id };
     }
 
     fun userExists(user: UserRequest): Mono<Boolean> {

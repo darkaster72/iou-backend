@@ -1,5 +1,6 @@
 package com.example.iou.authentication
 
+import com.example.iou.user.AppUserService
 import io.jsonwebtoken.Claims
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -11,11 +12,13 @@ import reactor.core.publisher.Mono
 @Component
 class AppAuthenticationManager(
     private val jwtUtil: JWTUtil,
+    private val appUserService: AppUserService,
 ) : ReactiveAuthenticationManager {
 
     override fun authenticate(authentication: Authentication): Mono<Authentication> {
         val authToken: String = authentication.credentials.toString()
         val username: String = jwtUtil.getUsernameFromToken(authToken)
+
         return Mono.just(jwtUtil.validateToken(authToken))
             .filter { it != null }
             .switchIfEmpty(Mono.empty())
@@ -24,11 +27,19 @@ class AppAuthenticationManager(
                 val roleList: List<Map<String, String>> =
                     claims.get("role", List::class.java) as List<Map<String, String>>
                 val roles = roleList.map { it["authority"] }.map(::SimpleGrantedAuthority)
-                UsernamePasswordAuthenticationToken(
+                val usernamePasswordAuthenticationToken = UsernamePasswordAuthenticationToken(
                     username,
                     authentication.credentials,
                     roles
                 )
-            };
+                usernamePasswordAuthenticationToken
+            }
+            .flatMap { auth ->
+                appUserService.getIdByUsername(username)
+                    .map {
+                        auth.details = it
+                        auth
+                    }
+            }
     }
 }
