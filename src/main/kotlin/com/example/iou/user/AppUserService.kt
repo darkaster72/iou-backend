@@ -4,6 +4,7 @@ import com.example.iou.models.UserRequest
 import com.example.iou.models.UserResponse
 import com.example.iou.user.models.AppUser
 import com.example.iou.user.models.AppUserView
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -17,15 +18,15 @@ class AppUserService(
     private val passwordEncoder: BCryptPasswordEncoder,
 ) : ReactiveUserDetailsService {
     override fun findByUsername(username: String?): Mono<UserDetails> {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username)
     }
 
     fun findByUsernameViewOnly(username: String?): Mono<AppUserView> {
-        return userRepository.findViewByUsername(username);
+        return userRepository.findViewByUsername(username)
     }
 
     fun getIdByUsername(username: String?): Mono<String> {
-        return userRepository.findViewByUsername(username).map { it.id };
+        return userRepository.findViewByUsername(username).map { it.id }
     }
 
     fun userExists(user: UserRequest): Mono<Boolean> {
@@ -34,6 +35,12 @@ class AppUserService(
 
     fun getUsers(): Flux<UserResponse> {
         return userRepository.findAll().map { it.toResponse() }
+    }
+
+    fun getCurrentUser(): Mono<UserResponse> {
+        return ReactiveSecurityContextHolder.getContext()
+            .flatMap { userRepository.findById(it.authentication.details as String) }
+            .map { it.toResponse() }
     }
 
     fun addUser(user: UserRequest): Mono<UserResponse> {
