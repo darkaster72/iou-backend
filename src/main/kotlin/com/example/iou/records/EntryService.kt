@@ -44,6 +44,13 @@ class EntryService(val entryRepository: EntryRepository) {
             .flatMapMany { entryRepository.findAllBySource(it) }
             .map { (it as Entry).toEntryResponse() }
     }
+
+    fun getEntriesForDestination(destinationId: String): Flux<EntryResponse> {
+        return ReactiveSecurityContextHolder.getContext()
+            .map { it.authentication.details as String }
+            .flatMapMany { entryRepository.findAllBySourceAndDestination(it, destinationId) }
+            .map { (it as Entry).toEntryResponse() }
+    }
 }
 
 fun Entry.toEntryResponse(): EntryResponse = EntryResponse(

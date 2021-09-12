@@ -21,4 +21,9 @@ class EntryController(
     fun getEntries(): Flux<EntryResponse> {
         return entryService.getEntries()
     }
+
+    @GetMapping("/to/{destinationId}")
+    fun getEntriesFor(@PathVariable destinationId: String): Flux<EntryResponse> {
+        return entryService.getEntriesForDestination(destinationId)
+    }
 }

@@ -5,4 +5,6 @@ import reactor.core.publisher.Flux
 
 interface EntryRepository : ReactiveMongoRepository<Entry, String> {
     fun findAllBySource(source: String): Flux<IEntry>
+
+    fun findAllBySourceAndDestination(source: String, destination: String): Flux<IEntry>
 }
