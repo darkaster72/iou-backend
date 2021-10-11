@@ -7,4 +7,6 @@ interface EntryRepository : ReactiveMongoRepository<Entry, String> {
     fun findAllBySource(source: String): Flux<IEntry>
 
     fun findAllBySourceAndDestination(source: String, destination: String): Flux<IEntry>
+
+    fun findAllBySourceAndTransactionType(source: String, transactionType: TransactionType): Flux<IEntry>
 }

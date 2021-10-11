@@ -11,13 +11,13 @@ import javax.money.Monetary
 class EntryService(val entryRepository: EntryRepository) {
 
     fun addEntry(entryRequest: EntryRequest): Mono<Unit> {
-        return ReactiveSecurityContextHolder.getContext()
-            .map { createDoubleEntry(entryRequest, it.authentication.details as String); }
+        return getUserId()
+            .map { createDoubleEntry(entryRequest, it); }
             .flatMap { entryRepository.insert(it).last().map { } }
     }
 
     private fun createDoubleEntry(entryRequest: EntryRequest, userId: String): List<Entry> {
-        val currency = Monetary.getCurrency(entryRequest.currency);
+        val currency = Monetary.getCurrency(entryRequest.currency)
         val money = Money.of(entryRequest.amount, currency)
         val firstEntry = Entry(
             source = userId,
@@ -35,25 +35,49 @@ class EntryService(val entryRepository: EntryRepository) {
             description = entryRequest.description,
             transactionType = entryRequest.transactionType.opposite()
         )
-        return listOf(firstEntry, secondEntry);
+        return listOf(firstEntry, secondEntry)
     }
 
     fun getEntries(): Flux<EntryResponse> {
-        return ReactiveSecurityContextHolder.getContext()
-            .map { it.authentication.details as String }
+        return getUserId()
             .flatMapMany { entryRepository.findAllBySource(it) }
-            .map { (it as Entry).toEntryResponse() }
+            .map { it.toResponse() }
     }
 
     fun getEntriesForDestination(destinationId: String): Flux<EntryResponse> {
-        return ReactiveSecurityContextHolder.getContext()
-            .map { it.authentication.details as String }
+        return getUserId()
             .flatMapMany { entryRepository.findAllBySourceAndDestination(it, destinationId) }
-            .map { (it as Entry).toEntryResponse() }
+            .map { it.toResponse() }
     }
+
+    fun getDebtorEntries(): Flux<EntryResponse> {
+        return getUserId()
+            .flatMapMany { entryRepository.findAllBySourceAndTransactionType(it, TransactionType.Debit) }
+            .map { it.toResponse() }
+    }
+
+    fun getCreditorEntries(): Flux<EntryResponse> {
+        return getUserId()
+            .flatMapMany { entryRepository.findAllBySourceAndTransactionType(it, TransactionType.Credit) }
+            .map { it.toResponse() }
+    }
+
+    private fun getUserId() = ReactiveSecurityContextHolder.getContext()
+        .map { it.authentication.details as String }
 }
 
-fun Entry.toEntryResponse(): EntryResponse = EntryResponse(
+fun Entry.toResponse(): EntryResponse = EntryResponse(
+    source = source,
+    destination = destination,
+    amount = amount.number.doubleValueExact(),
+    currency = amount.currency.currencyCode,
+    transactionType = transactionType,
+    dateTime = dateTime,
+    description = description,
+    verified = verified,
+)
+
+fun IEntry.toResponse(): EntryResponse = EntryResponse(
     source = source,
     destination = destination,
     amount = amount.number.doubleValueExact(),

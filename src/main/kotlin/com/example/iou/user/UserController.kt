@@ -16,12 +16,6 @@ class UserController(private val appUserService: AppUserService) {
         return appUserService.getUsers()
     }
 
-//
-//    @PostMapping
-//    fun addUser(@RequestBody userRequest: Mono<UserRequest>): Mono<UserResponse> {
-//        return userRequest.flatMap { appUserService.addUser(it) }
-//    }
-
     @GetMapping("/me")
     fun getMe(): Mono<UserResponse> {
         return appUserService.getCurrentUser()

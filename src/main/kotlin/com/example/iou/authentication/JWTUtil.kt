@@ -1,6 +1,7 @@
 package com.example.iou.authentication
 
 import com.example.iou.config.JwtConfig
+import io.jsonwebtoken.ClaimJwtException
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
@@ -22,8 +23,9 @@ class JWTUtil(private val jwtConfig: JwtConfig) {
         this.key = Keys.hmacShaKeyFor(jwtConfig.secret.toByteArray())
     }
 
+    @Throws(ClaimJwtException::class)
     fun getAllClaimsFromToken(token: String?): Claims {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody()
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).body
     }
 
     fun getUsernameFromToken(token: String): String {
@@ -59,7 +61,11 @@ class JWTUtil(private val jwtConfig: JwtConfig) {
     }
 
     fun validateToken(token: String): Boolean {
-        return !isTokenExpired(token)
+        return try {
+            !isTokenExpired(token)
+        } catch (e: ClaimJwtException) {
+            false;
+        }
     }
 
     @Bean

@@ -26,4 +26,14 @@ class EntryController(
     fun getEntriesFor(@PathVariable destinationId: String): Flux<EntryResponse> {
         return entryService.getEntriesForDestination(destinationId)
     }
+
+    @GetMapping("/debtors")
+    fun getDebtorEntries(): Flux<EntryResponse> {
+        return entryService.getDebtorEntries();
+    }
+
+    @GetMapping("/creditors")
+    fun getCreditorEntries(): Flux<EntryResponse> {
+        return entryService.getCreditorEntries();
+    }
 }
